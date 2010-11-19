@@ -1,7 +1,7 @@
 import random
 
-seed = '123456789'
-random.seed(seed)
+def set_seed(seed=123456789):
+    random.seed(seed)
 
 def generate_random_pt(alternatives, criteria):
 	pt = {}

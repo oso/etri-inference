@@ -12,7 +12,7 @@ def print_performance_table(pt, alternatives, criteria):
     for alt in alternatives:
         str = "%s" % alt
         for crit in criteria:
-            str += "\t%.3g" % pt[alt][crit]
+            str += "\t%.3g" % round(pt[alt][crit],3)
         print str
 
 def print_performance_table_with_assignements(pt, alternatives, criteria, assign, assign2=None, compat=None):
@@ -29,7 +29,7 @@ def print_performance_table_with_assignements(pt, alternatives, criteria, assign
     for alt in alternatives:
         str = "%s" % alt
         for crit in criteria:
-            str += "\t%.3g" % pt[alt][crit]
+            str += "\t%.3g" % round(pt[alt][crit],3)
         str += "\t|\t%d" % assign[alt]
         if assign2 <> None:
             str += "\t%d" % assign2[alt]
@@ -38,6 +38,11 @@ def print_performance_table_with_assignements(pt, alternatives, criteria, assign
                 str += "\t%d" % compat[alt]
             else:
                 str += "\t-"
+        if assign2 <> None:
+            if assign[alt] <> assign2[alt]:
+                str += "!"
+            if compat == 0 and assign[alt] == assign2[alt]:
+                str += "!!"
         print str
 
 def print_profiles(profiles, criteria, iprofiles=None):
@@ -52,7 +57,7 @@ def print_profiles(profiles, criteria, iprofiles=None):
         str3 = "    p"
         str4 = "    v"
         for crit in criteria:
-            str += "\t%.3g" % profile["refs"][crit]
+            str += "\t%.3g" % round(profile["refs"][crit],3)
 #            str2 += "\t%.3g" % profile["q"][crit]
 #            str3 += "\t%.3g" % profile["p"][crit]
 #            if profile["v"].has_key(crit):
@@ -73,7 +78,7 @@ def print_profiles(profiles, criteria, iprofiles=None):
         str3 = "    p"
         str4 = "    v"
         for crit in criteria:
-            str += "\t%.3g" % profile["refs"][crit]
+            str += "\t%.3g" % round(profile["refs"][crit],3)
 #            str2 += "\t%.3g" % profile["q"][crit]
 #            str3 += "\t%.3g" % profile["p"][crit]
 #            if profile["v"].has_key(crit):
@@ -94,11 +99,16 @@ def print_weights(weights, criteria, iweights=None):
     print str
     str = "w"
     for crit in criteria:
-        str += "\t%.3g" % (weights[crit]/sum_weights)
+        str += "\t%.3g" % round((weights[crit]/sum_weights),3)
     print str
     if iweights <> None:
         sum_iweights = sum(iweights.values())
         str = "wi"
         for crit in criteria:
-            str += "\t%.3g" % (iweights[crit]/sum_iweights)
+            str += "\t%.3g" % round((iweights[crit]/sum_iweights),3)
         print str
+
+def print_lambda(lbda, ilbda=None):
+    print "Lambda: %g" % lbda
+    if ilbda <> None:
+        print "iLambda: %g" % lbda

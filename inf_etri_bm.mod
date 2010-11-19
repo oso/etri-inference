@@ -11,8 +11,6 @@ set CRIT := 1..ncrit; /* set of criteria */
 param perfs{i in ALTS, j in CRIT};
 param assign{ALTS};
 
-param gmax{j in CRIT} := max{i in ALTS} perfs[i,j];
-
 /* Variables */
 var epsilon = 10e-5;
 var lambda  >= 0.5;
@@ -92,7 +90,7 @@ printf "### Profiles ###\n";
 for {i in 1..ncat-1}
 {
 	for {j in CRIT}	
-		printf "%g\t", gb[i,j]*gmax[j];
+		printf "%g\t", gb[i,j];
 	printf "\n";
 }
 printf "### Profiles ###\n";

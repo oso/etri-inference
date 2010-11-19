@@ -11,6 +11,8 @@ lbda = 0.75
 nalt_ref = 100
 
 # Generate random data
+random_data.set_seed('123456789')
+
 alternatives = [ "a%d" % (i+1) for i in range(nalternatives) ]
 criteria = [ "g%d" % (i+1) for i in range(ncriteria) ]
 profiles = [ "b%d" % (i+1) for i in range(nprofiles) ]
@@ -32,18 +34,19 @@ for i in range(nprofiles):
 #debug.print_profiles(profiles, criteria)
 
 #weights = random_data.generate_random_weights(criteria)
-weights = {}
-for crit in criteria:
-    weights[crit] = 0.2
+weights = {'g1': 0.1, 'g2': 0.2, 'g3': 0.4, 'g4': 0.5, 'g5': 0.6}
+#weights = {}
+#for i, crit in enumerate(criteria):
+#    weights[crit] = 0.2
 
 #debug.print_weights(weights, criteria)
 
 # Apply ELECTRE TRI method
 model = etri.electre_tri(pt, profiles, weights, lbda) 
-pessimit = model.pessimist()
+pessimist = model.pessimist()
 optimist = model.optimist()
 
-#debug.print_performance_table_with_assignements(pt, alternatives, criteria, pessimit)
+#debug.print_performance_table_with_assignements(pt, alternatives, criteria, pessimist)
 
 # Infer ELECTRE TRI parameter
 learning_alts = [ "a%d" % (i+1) for i in range(nalt_ref) ]
@@ -53,7 +56,7 @@ categories_rank = {}
 for i, cat in enumerate(categories):
     categories_rank[cat] = i+1
 
-infile = glpk.create_input_file(learning_alts, criteria, pt, categories, categories_rank, pessimit) 
+infile = glpk.create_input_file(learning_alts, criteria, pt, categories, categories_rank, pessimist) 
 
 (status, output) = glpk.solve(infile.name)
 infile.close()
@@ -75,6 +78,7 @@ if icompat == None:
 modeli = etri.electre_tri(pt, iprofiles, iweights, ilbda) 
 ipessimist = model.pessimist()
 
+debug.print_lambda(lbda, ilbda)
 debug.print_weights(weights, criteria, iweights)
 debug.print_profiles(profiles, criteria, iprofiles)
-debug.print_performance_table_with_assignements(pt, alternatives, criteria, pessimit, ipessimist, icompat)
+debug.print_performance_table_with_assignements(pt, alternatives, criteria, pessimist, ipessimist, icompat)
