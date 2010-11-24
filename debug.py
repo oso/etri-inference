@@ -111,4 +111,4 @@ def print_weights(weights, criteria, iweights=None):
 def print_lambda(lbda, ilbda=None):
     print "Lambda: %g" % lbda
     if ilbda <> None:
-        print "iLambda: %g" % lbda
+        print "iLambda: %g" % ilbda
