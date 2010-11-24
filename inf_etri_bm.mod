@@ -84,7 +84,7 @@ printf "SOLUTION:\n";
 
 printf "### Lambda ###\n";
 printf lambda;
-printf "### Lambda ###\n";
+printf "\n### Lambda ###\n";
 
 printf "### Profiles ###\n";
 for {i in 1..ncat-1}
