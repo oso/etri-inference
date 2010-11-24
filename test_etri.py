@@ -76,7 +76,7 @@ if icompat == None:
 
 # Apply ELECTRE TRI model
 modeli = etri.electre_tri(pt, iprofiles, iweights, ilbda) 
-ipessimist = model.pessimist()
+ipessimist = modeli.pessimist()
 
 debug.print_lambda(lbda, ilbda)
 debug.print_weights(weights, criteria, iweights)
