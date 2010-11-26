@@ -3,82 +3,97 @@ import random_data
 import debug
 import glpk
 import etri
+from optparse import OptionParser
 
-nalternatives = 1000
-ncriteria = 5
-nprofiles = 1
-lbda = 0.75
-nalt_ref = 100
+default_seed = 1
+default_nalternatives = 1000
+default_ncriteria = 5
+default_nprofiles = 1
+default_lbda = 0.75
+default_nlearning = 100
 
-# Generate random data
-random_data.set_seed(123456789)
+def create_model(nalternatives, ncriteria, nprofiles):
+    alternatives = [ "a%d" % (i+1) for i in range(nalternatives) ]
+    criteria = [ "g%d" % (i+1) for i in range(ncriteria) ]
+    palternatives = [ "b%d" % (i+1) for i in range(nprofiles) ]
+    return (alternatives, criteria, palternatives)
 
-alternatives = [ "a%d" % (i+1) for i in range(nalternatives) ]
-criteria = [ "g%d" % (i+1) for i in range(ncriteria) ]
-profiles = [ "b%d" % (i+1) for i in range(nprofiles) ]
+def generate_random_data(seed, alternatives, criteria, palternatives):
+    random_data.set_seed(seed)
+    pt = random_data.generate_random_pt(alternatives, criteria)
+    profiles = random_data.generate_random_profiles(palternatives, criteria)
+    weights = random_data.generate_random_weights(criteria)
+    lbda = random_data.generate_random_lambda() 
+    return (pt, profiles, weights, lbda)
 
-pt = random_data.generate_random_pt(alternatives, criteria)
-#debug.print_performance_table(pt, alternatives, criteria)
+def etri_infer_parameters(nlearning, criteria, pt, affectations, nprofiles):
+    learning_alts = [ "a%d" % (i+1) for i in range(nlearning) ]
+    categories = [ (i+1) for i in range(nprofiles+1) ]
+    categories_rank = {}
+    for i, cat in enumerate(categories):
+        categories_rank[cat] = i+1
+    infile = glpk.create_input_file(learning_alts, criteria, pt, categories, categories_rank, affectations) 
+    (status, output) = glpk.solve(infile.name)
+    if status:
+        sys.exit("gklp returned status %d" % status)
+    infile.close()
+    return glpk.parse_output(output, learning_alts, criteria)
 
-profiles= []
-for i in range(nprofiles):
-    refs = {}
-    p = {}
-    q = {}
-    for crit in criteria:
-        refs[crit] = 0.5
-        q[crit] = 0
-        p[crit] = 0
-    profiles.append({'refs': refs, 'p': p, 'q': q, 'v': {}})
-#profiles = random_data.generate_random_profiles(nprofiles, criteria)
-#debug.print_profiles(profiles, criteria)
+def parse_cmdline(argv=None):
+    parser = OptionParser()
+    parser.add_option("-a", "--nalternatives", dest="nalternatives")
+    parser.add_option("-c", "--ncriteria", dest="ncriteria")
+    parser.add_option("-p", "--nprofiles", dest="nprofiles")
+    parser.add_option("-r", "--nlearning", dest="nlearning")
+    parser.add_option("-l", "--lambda", dest="lbda")
+    parser.add_option("-s", "--seed", dest="seed")
+    (options, args) = parser.parse_args(argv[1:])
+    nalternatives = options.nalternatives
+    if not nalternatives:
+        nalternatives = default_nalternatives
+    ncriteria = options.ncriteria
+    if not ncriteria:
+        ncriteria = default_ncriteria
+    nprofiles = options.nprofiles
+    if not nprofiles:
+        nprofiles = default_nprofiles
+    nlearning = options.nlearning
+    if not nlearning:
+        nlearning = default_nlearning
+    lbda = options.lbda
+    if not lbda:
+        lbda = default_lbda
+    seed = options.seed
+    if not seed:
+        seed = default_seed
 
-#weights = random_data.generate_random_weights(criteria)
-weights = {'g1': 0.1, 'g2': 0.2, 'g3': 0.4, 'g4': 0.5, 'g5': 0.6}
-#weights = {}
-#for i, crit in enumerate(criteria):
-#    weights[crit] = 0.2
+    return (nalternatives, ncriteria, nprofiles, nlearning, lbda, seed)
 
-#debug.print_weights(weights, criteria)
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv
 
-# Apply ELECTRE TRI method
-model = etri.electre_tri(pt, profiles, weights, lbda) 
-pessimist = model.pessimist()
-optimist = model.optimist()
+    # Parse command line
+    (nalternatives, ncriteria, nprofiles, nlearning, lbda, seed) = parse_cmdline(argv)
 
-#debug.print_performance_table_with_assignements(pt, alternatives, criteria, pessimist)
+    # Create a model
+    (alternatives, criteria, palternatives) = create_model(nalternatives, ncriteria, nprofiles)
+    (pt, profiles, weights, lbda) = generate_random_data(seed, alternatives, criteria, palternatives)
+    model = etri.electre_tri(pt, profiles, weights, lbda) 
+    affectations = model.pessimist() 
 
-# Infer ELECTRE TRI parameter
-learning_alts = [ "a%d" % (i+1) for i in range(nalt_ref) ]
+    # Infer ELECTRE Tri parameters
+    (iweights, iprofiles, ilbda, icompat) = etri_infer_parameters(nlearning, criteria, pt, affectations, nprofiles)
 
-categories = [ (i+1) for i in range(nprofiles+1) ]
-categories_rank = {}
-for i, cat in enumerate(categories):
-    categories_rank[cat] = i+1
+    # Apply ELECTRE Tri model with infered parameters 
+    modeli = etri.electre_tri(pt, iprofiles, iweights, ilbda) 
+    iaffectations = modeli.pessimist()
 
-infile = glpk.create_input_file(learning_alts, criteria, pt, categories, categories_rank, pessimist) 
+    # Print result
+    debug.print_lambda(lbda, ilbda)
+    debug.print_weights(weights, criteria, iweights)
+    debug.print_profiles(profiles, criteria, iprofiles)
+    debug.print_performance_table_with_assignements(pt, alternatives, criteria, affectations, iaffectations, icompat)
 
-(status, output) = glpk.solve(infile.name)
-infile.close()
-
-if status:
-    sys.exit("gklp returned status %d" % status)
-
-(iweights, iprofiles, ilbda, icompat) = glpk.parse_output(output, learning_alts, criteria)
-if iweights == None:
-    sys.exit("Invalid weights");
-if iprofiles == None:
-    sys.exit("Invalid profiles")
-if ilbda == None:
-    sys.exit("Invalid lambda")
-if icompat == None:
-    sys.exit("Invalid compat");
-
-# Apply ELECTRE TRI model
-modeli = etri.electre_tri(pt, iprofiles, iweights, ilbda) 
-ipessimist = modeli.pessimist()
-
-debug.print_lambda(lbda, ilbda)
-debug.print_weights(weights, criteria, iweights)
-debug.print_profiles(profiles, criteria, iprofiles)
-debug.print_performance_table_with_assignements(pt, alternatives, criteria, pessimist, ipessimist, icompat)
+if __name__ == "__main__":
+    sys.exit(main())
