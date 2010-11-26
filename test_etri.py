@@ -20,7 +20,6 @@ profiles = [ "b%d" % (i+1) for i in range(nprofiles) ]
 pt = random_data.generate_random_pt(alternatives, criteria)
 #debug.print_performance_table(pt, alternatives, criteria)
 
-#profiles = random_data.generate_random_profiles(nprofiles, criteria)
 profiles= []
 for i in range(nprofiles):
     refs = {}
@@ -31,6 +30,7 @@ for i in range(nprofiles):
         q[crit] = 0
         p[crit] = 0
     profiles.append({'refs': refs, 'p': p, 'q': q, 'v': {}})
+#profiles = random_data.generate_random_profiles(nprofiles, criteria)
 #debug.print_profiles(profiles, criteria)
 
 #weights = random_data.generate_random_weights(criteria)
