@@ -11,7 +11,7 @@ lbda = 0.75
 nalt_ref = 100
 
 # Generate random data
-random_data.set_seed('123456789')
+random_data.set_seed(123456789)
 
 alternatives = [ "a%d" % (i+1) for i in range(nalternatives) ]
 criteria = [ "g%d" % (i+1) for i in range(ncriteria) ]
