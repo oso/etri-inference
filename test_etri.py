@@ -9,7 +9,6 @@ default_seed = 1
 default_nalternatives = 1000
 default_ncriteria = 5
 default_nprofiles = 1
-default_lbda = 0.75
 default_nlearning = 100
 
 def create_model(nalternatives, ncriteria, nprofiles):
@@ -20,10 +19,10 @@ def create_model(nalternatives, ncriteria, nprofiles):
 
 def generate_random_data(seed, alternatives, criteria, palternatives):
     random_data.set_seed(seed)
-    pt = random_data.generate_random_pt(alternatives, criteria)
     profiles = random_data.generate_random_profiles(palternatives, criteria)
     weights = random_data.generate_random_weights(criteria)
     lbda = random_data.generate_random_lambda() 
+    pt = random_data.generate_random_pt(alternatives, criteria)
     return (pt, profiles, weights, lbda)
 
 def etri_infer_parameters(nlearning, criteria, pt, affectations, nprofiles):
@@ -45,36 +44,39 @@ def parse_cmdline(argv=None):
     parser.add_option("-c", "--ncriteria", dest="ncriteria")
     parser.add_option("-p", "--nprofiles", dest="nprofiles")
     parser.add_option("-r", "--nlearning", dest="nlearning")
-    parser.add_option("-l", "--lambda", dest="lbda")
     parser.add_option("-s", "--seed", dest="seed")
     (options, args) = parser.parse_args(argv[1:])
-    nalternatives = options.nalternatives
+    nalternatives = int(options.nalternatives)
     if not nalternatives:
         nalternatives = default_nalternatives
-    ncriteria = options.ncriteria
+    ncriteria = int(options.ncriteria)
     if not ncriteria:
         ncriteria = default_ncriteria
-    nprofiles = options.nprofiles
+    nprofiles = int(options.nprofiles)
     if not nprofiles:
         nprofiles = default_nprofiles
-    nlearning = options.nlearning
+    nlearning = int(options.nlearning)
     if not nlearning:
         nlearning = default_nlearning
-    lbda = options.lbda
-    if not lbda:
-        lbda = default_lbda
-    seed = options.seed
+    seed = int(options.seed)
     if not seed:
         seed = default_seed
 
-    return (nalternatives, ncriteria, nprofiles, nlearning, lbda, seed)
+    return (nalternatives, ncriteria, nprofiles, nlearning, seed)
 
 def main(argv=None):
     if argv is None:
         argv = sys.argv
 
     # Parse command line
-    (nalternatives, ncriteria, nprofiles, nlearning, lbda, seed) = parse_cmdline(argv)
+    (nalternatives, ncriteria, nprofiles, nlearning, seed) = parse_cmdline(argv)
+    print "Input parameters"
+    print "================"
+    print "Nalternatives =", nalternatives
+    print "Ncriteria =", ncriteria
+    print "Nprofiles =", nprofiles
+    print "Nlearning =", nlearning
+    print "Seed =", seed
 
     # Create a model
     (alternatives, criteria, palternatives) = create_model(nalternatives, ncriteria, nprofiles)
@@ -90,6 +92,8 @@ def main(argv=None):
     iaffectations = modeli.pessimist()
 
     # Print result
+    print "Ouput"
+    print "====="
     debug.print_lambda(lbda, ilbda)
     debug.print_weights(weights, criteria, iweights)
     debug.print_profiles(profiles, criteria, iprofiles)
