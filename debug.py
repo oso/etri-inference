@@ -47,7 +47,7 @@ def print_performance_table_with_assignements(pt, alternatives, criteria, assign
                 str += "!!"
         print str
 
-    print "Assignment errors:", float(assign_errors)/float(len(alternatives)), "%"
+    print "Assignment errors:", float(assign_errors)/float(len(alternatives))
 
 def print_profiles(profiles, criteria, iprofiles=None):
     print "Profiles:"
