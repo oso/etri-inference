@@ -17,18 +17,18 @@ AREF_MAX=150
 AREF_STEP=10
 
 NCRIT_MIN=3
-NCRIT_MAX=6
+NCRIT_MAX=5
 
 NPROF_MIN=1
 NPROF_MAX=4
 
 for nprof in $(seq $NPROF_MIN $NPROF_MAX); do
-	for i in $(seq 1 $((150/10))); do
-		r=$((i*10))
-		for seed in ${SEED[*]}; do
-			for ncrit in $(seq $NCRIT_MIN $NCRIT_MAX); do
-				echo "Nprof: $nprof - Naref: $r - Seed: $seed - Ncrit: $ncrit"
-				python test_etri.py -s $seed -a 10000 -c $ncrit -p $nprof -r $r >$OUTPUT_DIR/$nprof-$r-$seed-$ncrit.txt
+	for ncrit in $(seq $NCRIT_MIN $NCRIT_MAX); do
+		for i in $(seq 1 $((150/10))); do
+			r=$((i*10))
+			for seed in ${SEED[*]}; do
+				echo "Nprof: $nprof - Ncrit: $ncrit - Naref: $r - Seed: $seed"
+				python test_etri.py -s $seed -a 10000 -c $ncrit -p $nprof -r $r >$OUTPUT_DIR/$nprof-$ncrit-$r-$seed.txt
 			done
 		done
 	done
