@@ -22,17 +22,22 @@ def generate_random_weights(criteria):
 
 def generate_random_profiles(palternatives, criteria):
 	profiles = []
+	ncat = len(palternatives)+1
+	step = float(1)/ncat
 	for i in palternatives:
 		profiles.append({"q" : {}, "p": {}, "v": {}, "refs": {}})
-	for i in criteria:
-		rnd = []
-		for j in palternatives:
-			rnd.append(round(random.random(),ROUND))
-		rnd.sort()
-		for j, palt in enumerate(palternatives):
-			profiles[j]["refs"][i] = rnd[j]
-			profiles[j]["q"][i] = 0
-			profiles[j]["p"][i] = 0
+	for i, palt in enumerate(palternatives):
+		for j in criteria:
+			if i > 0:
+				lower = max((float(i+1)/ncat-step),profiles[i-1]["refs"][j])
+			else:
+				lower = float(i+1)/ncat - step 
+			upper = float(i+1)/ncat + step 
+			rnd = random.uniform(lower, upper)
+			profiles[i]["refs"][j] = rnd
+			profiles[i]["q"][j] = 0
+			profiles[i]["p"][j] = 0
+
 	return profiles
 
 def generate_random_lambda():
