@@ -53,6 +53,10 @@ def parse_output(output, alt_id, crit_id):
         print "Integer optimal solution not found"
         return (None, None, None, None)
 
+    glpk_time = (output.partition("Time used:   ")[2]).partition("\n")[0]
+    glpk_mem = (output.partition("Memory used: ")[2]).partition("\n")[0]
+    info = [ glpk_time, glpk_mem ]
+
     glpk_weigths = (output.partition("\n### Criteria weights ###\n")[2]).partition("\n### Criteria weights ###\n")[0]
     w = glpk_weigths.split()
     weights = {}
@@ -81,4 +85,4 @@ def parse_output(output, alt_id, crit_id):
     for i, alt in enumerate(alt_id):
         compat[alt] = int(compatibility[i])
 
-    return (weights, profiles, lbda, compat)
+    return (weights, profiles, lbda, compat, info)
