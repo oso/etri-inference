@@ -72,11 +72,11 @@ def main(argv=None):
     (nalternatives, ncriteria, nprofiles, nlearning, seed) = parse_cmdline(argv)
     print "Input parameters"
     print "================"
-    print "Nalternatives =", nalternatives
-    print "Ncriteria =", ncriteria
-    print "Nprofiles =", nprofiles
-    print "Nlearning =", nlearning
-    print "Seed =", seed
+    print "Nalternatives:", nalternatives
+    print "Ncriteria:", ncriteria
+    print "Nprofiles:", nprofiles
+    print "Nlearning:", nlearning
+    print "Seed:", seed
 
     # Create a model
     (alternatives, criteria, palternatives) = create_model(nalternatives, ncriteria, nprofiles)
@@ -85,15 +85,17 @@ def main(argv=None):
     affectations = model.pessimist() 
 
     # Infer ELECTRE Tri parameters
-    (iweights, iprofiles, ilbda, icompat) = etri_infer_parameters(nlearning, criteria, pt, affectations, nprofiles)
+    (iweights, iprofiles, ilbda, icompat, info) = etri_infer_parameters(nlearning, criteria, pt, affectations, nprofiles)
 
     # Apply ELECTRE Tri model with infered parameters 
     modeli = etri.electre_tri(pt, iprofiles, iweights, ilbda) 
     iaffectations = modeli.pessimist()
 
     # Print result
-    print "Ouput"
-    print "====="
+    print "Output"
+    print "======"
+    print "Time used:", info[0]
+    print "Memory used:", info[1]
     debug.print_lambda(lbda, ilbda)
     debug.print_weights(weights, criteria, iweights)
     debug.print_profiles(profiles, criteria, iprofiles)
