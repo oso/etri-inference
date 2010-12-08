@@ -27,6 +27,7 @@ def print_performance_table_with_assignements(pt, alternatives, criteria, assign
         str += "\tCompat"
     print str
     assign_errors = 0
+    rounding_errors = 0
     for alt in alternatives:
         str = "%s" % alt
         for crit in criteria:
@@ -43,11 +44,14 @@ def print_performance_table_with_assignements(pt, alternatives, criteria, assign
             if assign[alt] <> assign2[alt]:
                 str += "!"
                 assign_errors += 1
+                if compat == 1:
+                    rounding_errors += 1
             if compat == 0 and assign[alt] == assign2[alt]:
                 str += "!!"
         print str
 
     print "Assignment errors:", float(assign_errors)/float(len(alternatives))
+    print "Aref rounding errors:", rounding_errors
 
 def print_profiles(profiles, criteria, iprofiles=None):
     print "Profiles:"
