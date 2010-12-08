@@ -13,18 +13,18 @@ SEED[7]=234
 SEED[8]=567
 SEED[9]=890
 
-AREF_MAX=150
+AREF_MAX=100
 AREF_STEP=10
 
 NCRIT_MIN=3
 NCRIT_MAX=5
 
 NPROF_MIN=1
-NPROF_MAX=4
+NPROF_MAX=3
 
 for nprof in $(seq $NPROF_MIN $NPROF_MAX); do
 	for ncrit in $(seq $NCRIT_MIN $NCRIT_MAX); do
-		for i in $(seq 1 $((150/10))); do
+		for i in $(seq 1 $(($AREF_MAX/10))); do
 			r=$((i*10))
 			for seed in ${SEED[*]}; do
 				echo "Nprof: $nprof - Ncrit: $ncrit - Naref: $r - Seed: $seed"
