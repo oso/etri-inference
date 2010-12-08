@@ -32,6 +32,7 @@ def etri_infer_parameters(nlearning, criteria, pt, affectations, nprofiles):
     for i, cat in enumerate(categories):
         categories_rank[cat] = i+1
     infile = glpk.create_input_file(learning_alts, criteria, pt, categories, categories_rank, affectations) 
+    print "GLPK file:", infile.name
     (status, output) = glpk.solve(infile.name)
     if status:
         sys.exit("gklp returned status %d" % status)
