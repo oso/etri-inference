@@ -11,9 +11,6 @@ set CRIT := 1..ncrit; /* set of criteria */
 param perfs{i in ALTS, j in CRIT};
 param assign{ALTS};
 
-param gmax{j in CRIT} := max{i in ALTS} perfs[i,j];
-param gmin{j in CRIT} := min{i in ALTS} perfs[i,j];
-
 /* Variables */
 var epsilon = 10e-5;
 var lambda  >= 0.5;
