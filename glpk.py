@@ -31,16 +31,8 @@ def create_input_file(alt_id, crit_id, pt, cat_id, cat_rank, assign):
 
     return f
 
-def solve_normalized(input_file):
-    p = subprocess.Popen(["glpsol", "-m", "inf_etri_bm_norm.mod", "-d", "%s" % input_file], stdout=subprocess.PIPE)
-
-    output = p.communicate()
-    status = p.returncode
-
-    return (status, output[0])
-
 def solve(input_file):
-    p = subprocess.Popen(["glpsol", "-m", "inf_etri_bm.mod", "-d", "%s" % input_file], stdout=subprocess.PIPE)
+    p = subprocess.Popen(["glpsol", "-m", "model/etri_bm_global.mod", "-d", "%s" % input_file], stdout=subprocess.PIPE)
 
     output = p.communicate()
     status = p.returncode
