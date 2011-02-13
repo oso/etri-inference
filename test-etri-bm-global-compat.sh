@@ -5,7 +5,7 @@ OUTPUT_DIR=test_data
 AREF_MIN=10
 AREF_MAX=100
 
-NCRIT_MIN=2
+NCRIT_MIN=3
 NCRIT_MAX=5
 
 NPROF_MIN=3
@@ -31,7 +31,7 @@ for nprof in $(seq $NPROF_MIN $NPROF_MAX); do
 					echo "Nprof: $nprof - Ncrit: $ncrit - Naref: $r - Seed: $seed"
 					tmpfile=$(mktemp)
 
-					python etri-bm-global-compat.py -s $seed -a 10000 -c $ncrit -p $nprof -r $r >$tmpfile
+					python etri-bm-global-compat.py -s $seed -a 10000 -c $ncrit -p $nprof -r $r -e 0 >$tmpfile
 					mv $tmpfile $OUTPUT_DIR/$nprof-$ncrit-$r-$seed.txt
 				fi
 			done
