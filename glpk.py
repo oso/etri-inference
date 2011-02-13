@@ -71,10 +71,14 @@ def parse_output(output, alt_id, crit_id):
     glpk_lambda = (output.partition("### Lambda ###\n")[2]).partition("### Lambda ###\n")[0]
     lbda = float(glpk_lambda)
 
-    glpk_compat = (output.partition("### Compatible alternatives ###\n")[2]).partition("### Compatible alternatives ###\n")[0]
-    compatibility = glpk_compat.split()
-    compat = {}
-    for i, alt in enumerate(alt_id):
-        compat[alt] = int(compatibility[i])
+    try:
+        glpk_compat = (output.partition("### Compatible alternatives ###\n")[2]).partition("### Compatible alternatives ###\n")[0]
+        compatibility = glpk_compat.split()
+        compat = {}
+        for i, alt in enumerate(alt_id):
+            compat[alt] = int(compatibility[i])
+    except:
+        for alt in alt_id:
+            compat[alt] = int(1);
 
     return (weights, profiles, lbda, compat, info)
