@@ -28,6 +28,7 @@ def print_performance_table_with_assignements(pt, alternatives, criteria, assign
     print str
     assign_errors = 0
     rounding_errors = 0
+    compatible = len(alternatives)
     for alt in alternatives:
         str = "%s" % alt
         for crit in criteria:
@@ -38,6 +39,8 @@ def print_performance_table_with_assignements(pt, alternatives, criteria, assign
         if compat <> None:
             if compat.has_key(alt):
                 str += "\t%d" % compat[alt]
+                if compat == 0:
+                    compatible = compatible - 1
             else:
                 str += "\t-"
         if assign2 <> None:
@@ -50,6 +53,7 @@ def print_performance_table_with_assignements(pt, alternatives, criteria, assign
                 str += "!!"
         print str
 
+    print "Compatible alternatives:", float(compatible)/len(alternatives)
     print "Assignment errors:", float(assign_errors)/float(len(alternatives))
     print "Aref rounding errors:", rounding_errors
 
@@ -107,13 +111,15 @@ def print_weights(weights, criteria, iweights=None):
     print str
     str = "w"
     for crit in criteria:
-        str += "\t%.3g" % round((weights[crit]/sum_weights),3)
+        str += "\t%.3g" % (weights[crit]/sum_weights)
+        #str += "\t%.3g" % round((weights[crit]/sum_weights),3)
     print str
     if iweights <> None:
         sum_iweights = sum(iweights.values())
         str = "wi"
         for crit in criteria:
-            str += "\t%.3g" % round((iweights[crit]/sum_iweights),3)
+            str += "\t%.3g" % (iweights[crit]/sum_iweights)
+            #str += "\t%.3g" % round((iweights[crit]/sum_iweights),3)
         print str
 
 def print_lambda(lbda, ilbda=None):
