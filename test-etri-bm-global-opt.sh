@@ -1,6 +1,6 @@
 #!/bin/sh
 
-OUTPUT_DIR=test_data_opt
+OUTPUT_DIR=data_compat_opt_10
 
 AREF_MIN=10
 AREF_MAX=100
