@@ -40,6 +40,12 @@ s.t. alphax{i in ALTS}:
 s.t. alphay{i in ALTS}:
 	alpha <= y[i];
 
+s.t. cinf{i in ALTS, j in CRIT}:
+	c_inf[i,j] <= weight[j];
+
+s.t. csup{i in ALTS, j in CRIT}:
+	c_sup[i,j] <= weight[j];
+
 s.t. cinf2{i in ALTS, j in CRIT}:
 	c_inf[i,j] <= d_inf[i,j];
 
