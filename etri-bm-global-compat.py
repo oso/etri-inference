@@ -44,8 +44,7 @@ def parse_cmdline(argv=None):
 
     return (nalternatives, ncriteria, nprofiles, nlearning, seed, error)
 
-def add_errors_in_learning_alts(affectations, nlearning, nprofiles, errors):
-    learning_alts = [ "a%d" % (i+1) for i in range(nlearning) ]
+def add_errors_in_learning_alts(affectations, learning_alts, nprofiles, errors):
     ncat = nprofiles
     for alt in learning_alts:
         if errors == 0:
@@ -82,10 +81,11 @@ def main(argv=None):
     affectations = model.pessimist() 
 
     # Add errors in learning alternatives
-    add_errors_in_learning_alts(affectations, nlearning, nprofiles, error)
+    learning_alts = [ "a%d" % (i+1) for i in range(nlearning) ]
+    add_errors_in_learning_alts(affectations, learning_alts, nprofiles, error)
 
     # Infer ELECTRE Tri parameters
-    (iweights, iprofiles, ilbda, icompat, info) = etri_infer_parameters(nlearning, criteria, pt, affectations, nprofiles, "models/etri_bm_global_compat.mod")
+    (iweights, iprofiles, ilbda, icompat, info) = etri_infer_parameters(learning_alts, criteria, pt, affectations, nprofiles, "models/etri_bm_global_compat.mod")
 
     # Apply ELECTRE Tri model with infered parameters 
     modeli = etri.electre_tri(pt, iprofiles, iweights, ilbda) 

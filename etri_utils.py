@@ -17,8 +17,7 @@ def generate_random_data(seed, alternatives, criteria, palternatives):
     pt = random_data.generate_random_pt(alternatives, criteria)
     return (pt, profiles, weights, lbda)
 
-def etri_infer_parameters(nlearning, criteria, pt, affectations, nprofiles, model):
-    learning_alts = [ "a%d" % (i+1) for i in range(nlearning) ]
+def etri_infer_parameters(learning_alts, criteria, pt, affectations, nprofiles, model):
     categories = [ (i+1) for i in range(nprofiles+1) ]
     categories_rank = {}
     for i, cat in enumerate(categories):

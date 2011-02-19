@@ -59,7 +59,8 @@ def main(argv=None):
     affectations = model.pessimist() 
 
     # Infer ELECTRE Tri parameters
-    (iweights, iprofiles, ilbda, icompat, info) = etri_infer_parameters(nlearning, criteria, pt, affectations, nprofiles, "models/etri_bm_global_opt.mod")
+    learning_alts = [ "a%d" % (i+1) for i in range(nlearning) ]
+    (iweights, iprofiles, ilbda, icompat, info) = etri_infer_parameters(learning_alts, criteria, pt, affectations, nprofiles, "models/etri_bm_global_opt.mod")
 
     # Apply ELECTRE Tri model with infered parameters 
     modeli = etri.electre_tri(pt, iprofiles, iweights, ilbda) 

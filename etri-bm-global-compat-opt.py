@@ -1,4 +1,5 @@
 import sys
+import random
 import random_data
 import debug
 import glpk
@@ -19,6 +20,7 @@ def parse_cmdline(argv=None):
     parser.add_option("-p", "--nprofiles", dest="nprofiles")
     parser.add_option("-r", "--nlearning", dest="nlearning")
     parser.add_option("-s", "--seed", dest="seed")
+    parser.add_option("-e", "--error", dest="error")
     (options, args) = parser.parse_args(argv[1:])
     nalternatives = int(options.nalternatives)
     if not nalternatives:
@@ -35,23 +37,36 @@ def parse_cmdline(argv=None):
     seed = int(options.seed)
     if not seed:
         seed = default_seed
+    error = int(options.error)
+    if not error:
+        error = default_error
 
-    return (nalternatives, ncriteria, nprofiles, nlearning, seed)
+    return (nalternatives, ncriteria, nprofiles, nlearning, seed, error)
 
-def remove_incompatible_alts(pt, icompat):
-    pt_adapted = pt.copy()
-    for alt, compat in pt.iteritems():
+def remove_incompatible_alts(learning_alts, icompat):
+    for alt, compat in icompat.iteritems():
         if compat == 0:
-            del pt_adapted[alt]
+            learning_alts.remove(alt)
 
-    return pt_adapted
+def add_errors_in_learning_alts(affectations, learning_alts, nprofiles, errors):
+    ncat = nprofiles
+    for alt in learning_alts:
+        if errors == 0:
+            break
+
+        old =  affectations[alt]
+        new = old 
+        while old == new:
+            new = ((old+random.randint(1, 10)) % (nprofiles+1))+1
+        affectations[alt] = new 
+        errors = errors - 1
 
 def main(argv=None):
     if argv is None:
         argv = sys.argv
 
     # Parse command line
-    (nalternatives, ncriteria, nprofiles, nlearning, seed) = parse_cmdline(argv)
+    (nalternatives, ncriteria, nprofiles, nlearning, seed, error) = parse_cmdline(argv)
     print "Input parameters"
     print "================"
     print "Nalternatives:", nalternatives
@@ -59,6 +74,7 @@ def main(argv=None):
     print "Nprofiles:", nprofiles
     print "Nlearning:", nlearning
     print "Seed:", seed
+    print "Errors:", error
 
     # Create a model
     (alternatives, criteria, palternatives) = create_model(nalternatives, ncriteria, nprofiles)
@@ -66,8 +82,12 @@ def main(argv=None):
     model = etri.electre_tri(pt, profiles, weights, lbda) 
     affectations = model.pessimist() 
 
+    # Add errors in learning alternatives
+    learning_alts = [ "a%d" % (i+1) for i in range(nlearning) ]
+    add_errors_in_learning_alts(affectations, learning_alts, nprofiles, error)
+
     # Infer ELECTRE Tri parameters with max compat program
-    (iweights, iprofiles, ilbda, icompat, info) = etri_infer_parameters(nlearning, criteria, pt, affectations, nprofiles, "models/etri_bm_global_compat.mod")
+    (iweights, iprofiles, ilbda, icompat, info) = etri_infer_parameters(learning_alts, criteria, pt, affectations, nprofiles, "models/etri_bm_global_compat.mod")
 
     # Apply ELECTRE Tri model with infered parameters 
     modeli = etri.electre_tri(pt, iprofiles, iweights, ilbda) 
@@ -84,8 +104,8 @@ def main(argv=None):
     debug.print_performance_table_with_assignements(pt, alternatives, criteria, affectations, iaffectations, icompat)
 
     # Infer ELECTRE Tri parameters to optimize parameters
-    pt_adapted = remove_incompatible_alts(pt, icompat)
-    (iweights, iprofiles, ilbda, icompat, info) = etri_infer_parameters(nlearning, criteria, pt_adapted, affectations, nprofiles, "models/etri_bm_global_opt.mod")
+    remove_incompatible_alts(learning_alts, icompat)
+    (iweights, iprofiles, ilbda, icompat, info) = etri_infer_parameters(learning_alts, criteria, pt, affectations, nprofiles, "models/etri_bm_global_opt.mod")
 
     # Apply ELECTRE Tri model with infered parameters 
     modeli = etri.electre_tri(pt, iprofiles, iweights, ilbda) 
