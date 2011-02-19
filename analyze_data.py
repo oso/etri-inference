@@ -66,18 +66,31 @@ def get_seed_results(directory, nprofs, ncrit, narefs, seed_list):
     n = 0
     sum_errors = 0
     sum_time = 0
+    sum_errors2 = 0
+    sum_time2 = 0
     for seed in seed_list:
         f = open("%s/%d-%d-%d-%s.txt" % (directory, nprofs, ncrit, narefs, seed))
+        i = 0
         for line in f:
-            if line.find("Assignment errors:") != -1:
-                errors = float(line.lstrip("Assignment errors:"))
-                sum_errors += errors
-            if line.find("Time used:") != -1:
-                time = float(line.lstrip("Time used:").rstrip("secs\n"))
-                sum_time += time
+            if i == 0:
+                if line.find("Time used:") != -1:
+                    time = float(line.lstrip("Time used:").rstrip("secs\n"))
+                    sum_time += time
+                if line.find("Assignment errors:") != -1:
+                    errors = float(line.lstrip("Assignment errors:"))
+                    sum_errors += errors
+                if line.find("Output 2") != -1:
+                    i = 1
+            else:
+                if line.find("Time used:") != -1:
+                    time = float(line.lstrip("Time used:").rstrip("secs\n"))
+                    sum_time2 += time
+                if line.find("Assignment errors:") != -1:
+                    errors = float(line.lstrip("Assignment errors:"))
+                    sum_errors2 += errors
         n = n+1
 
-    return (round(sum_errors/n,4), round(sum_time/n, 3))
+    return (round(sum_errors/n,4), round(sum_time/n, 3), round(sum_errors2/n,4), round(sum_time2/n, 3))
 
 def main(argv=None):
     if argv is None:
@@ -88,15 +101,15 @@ def main(argv=None):
     listdir = os.listdir(directory)
     nprofs_list = get_nprofiles_list(listdir)
 
-    print "p\tc\tn\te\tt"
+    print "p\tc\tn\te\tt\te2\tt2"
     for nprofs in nprofs_list:
         ncrit_list = get_ncriteria_list(listdir, nprofs)
         for ncrit in ncrit_list:
             narefs_list = get_naref_list(listdir, nprofs, ncrit) 
             for narefs in narefs_list:
                 seed_list = get_seed_list(listdir, nprofs, ncrit, narefs)
-                (errors, time) = get_seed_results(directory, nprofs, ncrit, narefs, seed_list)
-                print "%d\t%d\t%d\t%5g\t%5g" % (nprofs, ncrit, narefs, errors, time)
+                (errors, time, errors2, time2) = get_seed_results(directory, nprofs, ncrit, narefs, seed_list)
+                print "%d\t%d\t%d\t%5g\t%5g\t%5g\t%5g" % (nprofs, ncrit, narefs, errors, time, errors2, time2)
 
 if __name__ == "__main__":
     sys.exit(main())
