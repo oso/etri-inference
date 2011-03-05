@@ -12,6 +12,7 @@ default_nalternatives = 1000
 default_ncriteria = 5
 default_nprofiles = 1
 default_nlearning = 100
+default_error = 0
 
 def parse_cmdline(argv=None):
     parser = OptionParser()
@@ -44,9 +45,12 @@ def parse_cmdline(argv=None):
     return (nalternatives, ncriteria, nprofiles, nlearning, seed, error)
 
 def remove_incompatible_alts(learning_alts, icompat):
+    n = 0
     for alt, compat in icompat.iteritems():
         if compat == 0:
             learning_alts.remove(alt)
+            n = n+1
+    return n
 
 def add_errors_in_learning_alts(affectations, learning_alts, nprofiles, errors):
     ncat = nprofiles
@@ -59,6 +63,7 @@ def add_errors_in_learning_alts(affectations, learning_alts, nprofiles, errors):
         while old == new:
             new = ((old+random.randint(1, 10)) % (nprofiles+1))+1
         affectations[alt] = new 
+        print "alt %s, old = %d, new = %d" % (alt, old, new)
         errors = errors - 1
 
 def main(argv=None):
@@ -104,7 +109,8 @@ def main(argv=None):
     debug.print_performance_table_with_assignements(pt, alternatives, criteria, affectations, iaffectations, icompat)
 
     # Infer ELECTRE Tri parameters to optimize parameters
-    remove_incompatible_alts(learning_alts, icompat)
+    nincomp = remove_incompatible_alts(learning_alts, icompat)
+    print "Number of incompatible alternatives:", nincomp
     (iweights, iprofiles, ilbda, icompat, info) = etri_infer_parameters(learning_alts, criteria, pt, affectations, nprofiles, "models/etri_bm_global_opt.mod")
 
     # Apply ELECTRE Tri model with infered parameters 
