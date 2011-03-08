@@ -92,6 +92,17 @@ def get_seed_results(directory, nprofs, ncrit, narefs, seed_list):
                     sum_errors2 += errors2
                     n2 = n2+1
 
+    if sum_errors == 0:
+        sum_errors += 1
+    if sum_time == 0:
+        sum_time += 1
+    if sum_errors2 == 0:
+        sum_errors2 += 1
+    if sum_time2 == 0:
+        sum_time2 += 1
+    if n2 == 0:
+        n2 += 1
+
     return (n, round(sum_errors/n,4), round(sum_time/n, 3), n2, round(sum_errors2/n2,4), round(sum_time2/n2, 3))
 
 def main(argv=None):

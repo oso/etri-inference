@@ -1,7 +1,7 @@
 import tempfile
 import subprocess
 
-def create_input_file(alt_id, crit_id, pt, cat_id, cat_rank, assign):
+def create_input_file(alt_id, crit_id, pt, cat_id, cat_rank, assign, weights=None, lbda=None, profiles=None):
     f = tempfile.NamedTemporaryFile(delete=False)
     if not f:
         return None
@@ -26,13 +26,33 @@ def create_input_file(alt_id, crit_id, pt, cat_id, cat_rank, assign):
         f.write("[%d] %d " % ((i+1), cat_rank[assign[alt_id[i]]]))
     f.write(";\n")
 
+    if weights <> None:
+        f.write("param weight :=")
+        for i in range(len(crit_id)):
+            f.write("[%d] %f " % ((i+1), weights[crit_id[i]]))
+        f.write(";\n")
+        f.write("param lambda := %f;\n" % lbda)
+
+    if profiles <> None:
+        f.write("param profiles :\t")
+        for i in range(len(crit_id)):
+            f.write("%d\t" % (i+1))
+        f.write(":=\n")
+        for i in range(len(profiles)):
+            f.write("\t%d\t" % (i+1))
+            perfs = profiles[i]
+            for j in range(len(crit_id)):
+                f.write("%f\t" % perfs[crit_id[j]]) 
+            f.write("\n")
+        f.write(";\n")
+
     f.write("end;\n")
     f.flush()
 
     return f
 
 def solve(input_file, model):
-    p = subprocess.Popen(["glpsol", "-m", "%s" % model, "-d", "%s" % input_file], stdout=subprocess.PIPE)
+    p = subprocess.Popen(["/usr/bin/glpsol", "-m", "%s" % model, "-d", "%s" % input_file, "--tmlim", "7200", "--pcost"], stdout=subprocess.PIPE)
 
     output = p.communicate()
     status = p.returncode
@@ -45,6 +65,7 @@ def parse_output(output, alt_id, crit_id):
         print "Integer optimal solution not found"
         return (None, None, None, None)
 
+    output = output.partition("INTEGER OPTIMAL SOLUTION FOUND")[2]
     glpk_time = (output.partition("Time used:   ")[2]).partition("\n")[0]
     glpk_mem = (output.partition("Memory used: ")[2]).partition("\n")[0]
     info = [ glpk_time, glpk_mem ]

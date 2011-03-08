@@ -18,6 +18,9 @@ def generate_random_weights(criteria):
     weights = {}
     for i in criteria:
         weights[i] = round(random.random(),ROUND)
+    wsum = sum(weights.values())
+    for key, value in weights.iteritems():
+        weights[key] = value/wsum
     return weights
 
 def generate_random_profiles(palternatives, criteria):

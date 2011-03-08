@@ -17,12 +17,12 @@ def generate_random_data(seed, alternatives, criteria, palternatives):
     pt = random_data.generate_random_pt(alternatives, criteria)
     return (pt, profiles, weights, lbda)
 
-def etri_infer_parameters(learning_alts, criteria, pt, affectations, nprofiles, model):
+def etri_infer_parameters(learning_alts, criteria, pt, affectations, nprofiles, model, weights=None, lbda=None, profiles=None):
     categories = [ (i+1) for i in range(nprofiles+1) ]
     categories_rank = {}
     for i, cat in enumerate(categories):
         categories_rank[cat] = i+1
-    infile = glpk.create_input_file(learning_alts, criteria, pt, categories, categories_rank, affectations) 
+    infile = glpk.create_input_file(learning_alts, criteria, pt, categories, categories_rank, affectations, weights, lbda, profiles)
     print "GLPK file:", infile.name
     (status, output) = glpk.solve(infile.name, model)
     if status:
