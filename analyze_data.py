@@ -65,9 +65,13 @@ def get_seed_list(listdir, nprofs, ncrit, narefs):
 def get_seed_results(directory, nprofs, ncrit, narefs, seed_list):
     n = 0
     n2 = 0
-    sum_errors = 0
+    min_errors = 1
+    max_errors = 0
+    list_errors = []
     sum_time = 0
-    sum_errors2 = 0
+    min_errors2 = 1
+    max_errors2 = 0
+    list_errors2 = []
     sum_time2 = 0
     for seed in seed_list:
         f = open("%s/%d-%d-%d-%s.txt" % (directory, nprofs, ncrit, narefs, seed))
@@ -79,8 +83,7 @@ def get_seed_results(directory, nprofs, ncrit, narefs, seed_list):
                     sum_time += time
                 if line.find("Assignment errors:") != -1:
                     errors = float(line.lstrip("Assignment errors:"))
-                    sum_errors += errors
-                    n = n+1
+                    list_errors.append(errors)
                 if line.find("Output 2") != -1:
                     i = 1
             else:
@@ -89,21 +92,50 @@ def get_seed_results(directory, nprofs, ncrit, narefs, seed_list):
                     sum_time2 += time2
                 if line.find("Assignment errors:") != -1:
                     errors2 = float(line.lstrip("Assignment errors:"))
-                    sum_errors2 += errors2
+                    list_errors2.append(errors2)
                     n2 = n2+1
 
-    if sum_errors == 0:
-        sum_errors += 1
-    if sum_time == 0:
-        sum_time += 1
-    if sum_errors2 == 0:
-        sum_errors2 += 1
-    if sum_time2 == 0:
-        sum_time2 += 1
-    if n2 == 0:
-        n2 += 1
+    results = {}
 
-    return (n, round(sum_errors/n,4), round(sum_time/n, 3), n2, round(sum_errors2/n2,4), round(sum_time2/n2, 3))
+    n = len(list_errors)
+    if n > 0:
+        m = round(sum(list_errors)/n,4)
+        s = round(sum([(x-m)**2 for x in list_errors])/(n-1), 4)**0.5
+
+        results["n"] = n
+        results["avg_errors"] = m
+        results["std_errors"] = s
+        results["max_errors"] = round(max(list_errors), 4)
+        results["min_errors"] = round(min(list_errors), 4)
+        results["avg_time"] = round(sum_time/n, 3)
+    else:
+        results["n"] = 0
+        results["avg_errors"] = 0 
+        results["std_errors"] = 0
+        results["max_errors"] = 0
+        results["min_errors"] = 0
+        results["avg_time"] = 0
+
+    n2 = len(list_errors2)
+    if n2 > 0:
+        m = round(sum(list_errors2)/n,4)
+        s = round(sum([(x-m)**2 for x in list_errors2])/(n-1), 4)**0.5
+
+        results["n2"] = n2 
+        results["avg_errors2"] = m
+        results["std_errors2"] = s
+        results["max_errors2"] = round(max(list_errors2), 4)
+        results["min_errors2"] = round(min(list_errors2), 4)
+        results["avg_time2"] = round(sum_time2/n, 3)
+    else:
+        results["n2"] = -1
+        results["avg_errors2"] = 0 
+        results["std_errors2"] = 0
+        results["max_errors2"] = 0
+        results["min_errors2"] = 0
+        results["avg_time2"] = 0
+
+    return results
 
 def main(argv=None):
     if argv is None:
@@ -114,15 +146,21 @@ def main(argv=None):
     listdir = os.listdir(directory)
     nprofs_list = get_nprofiles_list(listdir)
 
-    print "p\tc\tn\ti\te\tt\ti2\te2\tt2\ted"
+    print "p\tc\tn\ti\te\testd\temin\temax\tt\ti2\te2\testd2\te2min\te2max\tt2\ted"
     for nprofs in nprofs_list:
         ncrit_list = get_ncriteria_list(listdir, nprofs)
         for ncrit in ncrit_list:
             narefs_list = get_naref_list(listdir, nprofs, ncrit) 
             for narefs in narefs_list:
                 seed_list = get_seed_list(listdir, nprofs, ncrit, narefs)
-                (n, errors, time, n2, errors2, time2) = get_seed_results(directory, nprofs, ncrit, narefs, seed_list)
-                print "%d\t%d\t%d\t%d\t%5g\t%5g\t%d\t%5g\t%5g\t%5g" % (nprofs, ncrit, narefs, n, errors, time, n2, errors2, time2, errors2-errors)
+                results = get_seed_results(directory, nprofs, ncrit, narefs, seed_list)
+                print "%d\t%d\t%d\t%d\t%5g\t%.2g\t%5g\t%5g\t%5g\t%d\t%5g\t%.2g\t%5g\t%5g\t%5g\t%5g" % \
+                    (nprofs, ncrit, narefs, \
+                    results["n"], results["avg_errors"]*100, results["std_errors"]*100, \
+                    results["min_errors"]*100, results["max_errors"]*100, results["avg_time"]*100, \
+                    results["n2"], results["avg_errors2"]*100, results["std_errors2"]*100, \
+                    results["min_errors2"]*100, results["max_errors2"]*100, results["avg_time2"]*100, \
+                    (results["avg_errors2"]-results["avg_errors"])*100)
 
 if __name__ == "__main__":
     sys.exit(main())
